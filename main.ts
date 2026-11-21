@@ -26,6 +26,12 @@
 //
 // Length check (Unicode code points, newlines included): 271, inside the
 // competition's 1–280 range. Verified with Python len() on the output file.
+//
+// The program also checks itself before writing: it counts the text in code
+// points (a spread counts surrogate pairs as one, where .length would count
+// two) and refuses to write anything outside the 1–280 range, so a future
+// edit to the text that breaks the gate fails loudly here instead of
+// silently shipping an invalid entry.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -34,6 +40,11 @@ const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 
 const TEXT =
   'Past the last streetlight the tide lays a thin mirror over the sand, and for one second the whole sky fits inside it. You stand small beside dark water, and nothing in it hurries. The stars come down to meet you, wave after wave, and there is nowhere else you have to be.';
+
+const CODE_POINTS = [...TEXT].length;
+if (CODE_POINTS < 1 || CODE_POINTS > 280) {
+  throw new Error(`entry text is ${CODE_POINTS} code points, outside the 1–280 range`);
+}
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
 writeFileSync(join(OUTPUT_DIR, 'entry.txt'), TEXT);
